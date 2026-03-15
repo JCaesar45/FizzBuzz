@@ -1,806 +1,939 @@
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FizzBuzz | Algorithmic Visualization Engine</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Space+Grotesk:wght@300;500;700&display=swap');
-
-    :root {
-      --neon-cyan: #00f3ff;
-      --neon-magenta: #ff00ff;
-      --neon-yellow: #ffff00;
-      --dark-void: #0a0a0f;
-      --deep-space: #12121a;
-      --glass: rgba(255, 255, 255, 0.03);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--dark-void);
-      color: #e0e0e0;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
-
-    #quantum-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      opacity: 0.4;
-    }
-
-    .container {
-      position: relative;
-      z-index: 10;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    header {
-      text-align: center;
-      padding: 4rem 0;
-      position: relative;
-    }
-
-    .glitch-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: clamp(3rem, 10vw, 8rem);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: -0.05em;
-      position: relative;
-      display: inline-block;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: quantum-shift 4s ease-in-out infinite;
-    }
-
-    @keyframes quantum-shift {
-
-      0%,
-      100% {
-        filter: hue-rotate(0deg);
-      }
-
-      50% {
-        filter: hue-rotate(30deg);
-      }
-    }
-
-    .subtitle {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      color: var(--neon-cyan);
-      margin-top: 1rem;
-      opacity: 0.8;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-    }
-
-    .control-matrix {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin: 3rem 0;
-    }
-
-    .control-panel {
-      background: var(--glass);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 243, 255, 0.1);
-      border-radius: 20px;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .control-panel::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, var(--neon-cyan), transparent, var(--neon-magenta));
-      border-radius: 20px;
-      opacity: 0;
-      z-index: -1;
-      transition: opacity 0.3s;
-    }
-
-    .control-panel:hover::before {
-      opacity: 0.5;
-      animation: border-rotate 3s linear infinite;
-    }
-
-    @keyframes border-rotate {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .panel-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--neon-cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.2em;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .panel-title::before {
-      content: '>';
-      color: var(--neon-magenta);
-    }
-
-    .range-container {
-      margin: 1.5rem 0;
-    }
-
-    .range-label {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      color: #888;
-      margin-bottom: 0.5rem;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      background: var(--neon-cyan);
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-      transition: transform 0.2s;
-    }
-
-    input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-    }
-
-    .custom-divisors {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .input-group {
-      position: relative;
-    }
-
-    .input-group label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      color: #666;
-      text-transform: uppercase;
-      display: block;
-      margin-bottom: 0.5rem;
-    }
-
-    .input-group input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(0, 243, 255, 0.2);
-      color: var(--neon-cyan);
-      padding: 0.8rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      border-radius: 8px;
-      outline: none;
-      transition: all 0.3s;
-    }
-
-    .input-group input:focus {
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
-    }
-
-    .btn-matrix {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-top: 1.5rem;
-    }
-
-    .quantum-btn {
-      background: transparent;
-      border: 1px solid var(--neon-cyan);
-      color: var(--neon-cyan);
-      padding: 1rem 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
-
-    .quantum-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .quantum-btn:hover::before {
-      left: 100%;
-    }
-
-    .quantum-btn:hover {
-      background: rgba(0, 243, 255, 0.1);
-      box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .quantum-btn.primary {
-      background: var(--neon-cyan);
-      color: var(--dark-void);
-      font-weight: 700;
-    }
-
-    .quantum-btn.primary:hover {
-      background: #fff;
-      box-shadow: 0 0 40px rgba(0, 243, 255, 0.6);
-    }
-
-    .visualization-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 0.5rem;
-      margin: 3rem 0;
-      perspective: 1000px;
-    }
-
-    .fizz-node {
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 700;
-      border-radius: 12px;
-      cursor: pointer;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      animation: node-appear 0.5s ease-out backwards;
-    }
-
-    @keyframes node-appear {
-      0% {
-        opacity: 0;
-        transform: scale(0) rotateY(180deg);
-      }
-
-      100% {
-        opacity: 1;
-        transform: scale(1) rotateY(0);
-      }
-    }
-
-    .fizz-node.number {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #888;
-    }
-
-    .fizz-node.fizz {
-      background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(0, 243, 255, 0.05));
-      border: 1px solid var(--neon-cyan);
-      color: var(--neon-cyan);
-      box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-      animation: pulse-cyan 2s infinite;
-    }
-
-    .fizz-node.buzz {
-      background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(255, 0, 255, 0.05));
-      border: 1px solid var(--neon-magenta);
-      color: var(--neon-magenta);
-      box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
-      animation: pulse-magenta 2s infinite;
-    }
-
-    .fizz-node.fizzbuzz {
-      background: linear-gradient(135deg, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.05));
-      border: 1px solid var(--neon-yellow);
-      color: var(--neon-yellow);
-      box-shadow: 0 0 30px rgba(255, 255, 0, 0.3);
-      animation: pulse-yellow 1s infinite;
-      font-size: 0.6rem;
-    }
-
-    @keyframes pulse-cyan {
-
-      0%,
-      100% {
-        box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-      }
-
-      50% {
-        box-shadow: 0 0 40px rgba(0, 243, 255, 0.4);
-      }
-    }
-
-    @keyframes pulse-magenta {
-
-      0%,
-      100% {
-        box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
-      }
-
-      50% {
-        box-shadow: 0 0 40px rgba(255, 0, 255, 0.4);
-      }
-    }
-
-    @keyframes pulse-yellow {
-
-      0%,
-      100% {
-        box-shadow: 0 0 30px rgba(255, 255, 0, 0.3);
-      }
-
-      50% {
-        box-shadow: 0 0 60px rgba(255, 255, 0, 0.6);
-      }
-    }
-
-    .fizz-node:hover {
-      transform: scale(1.1) translateZ(20px);
-      z-index: 100;
-    }
-
-    .fizz-node .tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.9);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 0.5rem;
-    }
-
-    .fizz-node:hover .tooltip {
-      opacity: 1;
-    }
-
-    .stats-matrix {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin: 2rem 0;
-    }
-
-    .stat-card {
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 1.5rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-      opacity: 0.5;
-    }
-
-    .stat-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--neon-cyan);
-      display: block;
-    }
-
-    .stat-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #666;
-      margin-top: 0.5rem;
-    }
-
-    .code-terminal {
-      background: #0d0d12;
-      border-radius: 16px;
-      border: 1px solid rgba(0, 243, 255, 0.1);
-      margin: 3rem 0;
-      overflow: hidden;
-    }
-
-    .terminal-header {
-      background: rgba(255, 255, 255, 0.02);
-      padding: 1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .terminal-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-
-    .terminal-dot.red {
-      background: #ff5f56;
-    }
-
-    .terminal-dot.yellow {
-      background: #ffbd2e;
-    }
-
-    .terminal-dot.green {
-      background: #27c93f;
-    }
-
-    .terminal-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: #666;
-      margin-left: 1rem;
-    }
-
-    .terminal-body {
-      padding: 1.5rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      line-height: 1.8;
-      overflow-x: auto;
-    }
-
-    .code-line {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .line-number {
-      color: #444;
-      min-width: 2rem;
-      text-align: right;
-      user-select: none;
-    }
-
-    .code-content {
-      color: #e0e0e0;
-    }
-
-    .keyword {
-      color: #ff79c6;
-    }
-
-    .function {
-      color: #8be9fd;
-    }
-
-    .string {
-      color: #f1fa8c;
-    }
-
-    .number {
-      color: #bd93f9;
-    }
-
-    .comment {
-      color: #6272a4;
-    }
-
-    .operator {
-      color: #ff79c6;
-    }
-
-    .wave-container {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 200px;
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    .mode-toggle {
-      position: fixed;
-      top: 2rem;
-      right: 2rem;
-      z-index: 1000;
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .mode-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: var(--glass);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-
-    .mode-btn:hover {
-      background: rgba(0, 243, 255, 0.1);
-      border-color: var(--neon-cyan);
-    }
-
-    .mode-btn.active {
-      background: var(--neon-cyan);
-      color: var(--dark-void);
-    }
-
-    @media (max-width: 768px) {
-      .stats-matrix {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .visualization-grid {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <canvas id="quantum-canvas"></canvas>
-
-  <div class="mode-toggle">
-    <button class="mode-btn active" onclick="setMode('grid')" title="Grid View">⊞</button>
-    <button class="mode-btn" onclick="setMode('wave')" title="Wave View">∿</button>
-    <button class="mode-btn" onclick="setMode('spiral')" title="Spiral View">◎</button>
-  </div>
-
-  <div class="container">
-    <header>
-      <h1 class="glitch-title">FizzBuzz</h1>
-      <p class="subtitle">Algorithmic Visualization Engine v2.0</p>
-    </header>
-
-    <div class="control-matrix">
-      <div class="control-panel">
-        <div class="panel-title">Range Configuration</div>
-        <div class="range-container">
-          <div class="range-label">
-            <span>Start</span>
-            <span id="start-val">1</span>
-          </div>
-          <input type="range" id="start-range" min="1" max="1000" value="1" oninput="updateRange('start', this.value)">
-        </div>
-        <div class="range-container">
-          <div class="range-label">
-            <span>End</span>
-            <span id="end-val">100</span>
-          </div>
-          <input type="range" id="end-range" min="1" max="1000" value="100" oninput="updateRange('end', this.value)">
-        </div>
-      </div>
-
-      <div class="control-panel">
-        <div class="panel-title">Custom Divisors</div>
-        <div class="custom-divisors">
-          <div class="input-group">
-            <label>First Divisor</label>
-            <input type="number" id="div-1" value="3" min="1">
-          </div>
-          <div class="input-group">
-            <label>First Label</label>
-            <input type="text" id="label-1" value="Fizz">
-          </div>
-          <div class="input-group">
-            <label>Second Divisor</label>
-            <input type="number" id="div-2" value="5" min="1">
-          </div>
-          <div class="input-group">
-            <label>Second Label</label>
-            <input type="text" id="label-2" value="Buzz">
-          </div>
-        </div>
-      </div>
-
-      <div class="control-panel">
-        <div class="panel-title">Execution Control</div>
-        <div class="btn-matrix">
-          <button class="quantum-btn primary" onclick="executeFizzBuzz()">Initialize</button>
-          <button class="quantum-btn" onclick="exportData()">Export JSON</button>
-          <button class="quantum-btn" onclick="benchmark()">Benchmark</button>
-          <button class="quantum-btn" onclick="clearAll()">Clear</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats-matrix">
-      <div class="stat-card">
-        <span class="stat-value" id="stat-total">0</span>
-        <div class="stat-label">Total Items</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-value" id="stat-fizz">0</span>
-        <div class="stat-label">Fizz Count</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-value" id="stat-buzz">0</span>
-        <div class="stat-label">Buzz Count</div>
-      </div>
-      <div class="stat-card">
-        <span class="stat-value" id="stat-fizzbuzz">0</span>
-        <div class="stat-label">FizzBuzz Count</div>
-      </div>
-    </div>
-
-    <div class="visualization-grid" id="viz-grid"></div>
-
-    <div class="code-terminal">
-      <div class="terminal-header">
-        <div class="terminal-dot red"></div>
-        <div class="terminal-dot yellow"></div>
-        <div class="terminal-dot green"></div>
-        <span class="terminal-title">source.js — fizzBuzz implementation</span>
-      </div>
-      <div class="terminal-body" id="code-display"></div>
-    </div>
-  </div>
-
-  <svg class="wave-container" id="wave-svg" viewBox="0 0 1440 200" preserveAspectRatio="none">
-    <path id="wave-path" fill="rgba(0, 243, 255, 0.1)" stroke="rgba(0, 243, 255, 0.3)" stroke-width="2"></path>
-  </svg>
-
-  <script>
-    const canvas = document.getElementById('quantum-canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    let animationId;
-    let currentMode = 'grid';
-    let fizzBuzzData = [];
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    class Particle {
-      constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.vx = (Math.random() - 0.5) * 0.5;
-        this.vy = (Math.random() - 0.5) * 0.5;
-        this.radius = Math.random() * 2;
-        this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff00ff';
-      }
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
-      }
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-      }
-    }
-
-    function initParticles() {
-      particles = [];
-      for (let i = 0; i < 100; i++) {
-        particles.push(new Particle());
-      }
-    }
-
-    function animateParticles() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => {
-        p.update();
-        p.draw();
-        particles.slice(i + 1).forEach(p2 => {
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 150) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(0, 243, 255, ${0.1 * (1 - dist / 150)})`;
-            ctx.stroke();
-          }
-        });
-      });
-      animationId = requestAnimationFrame(animateParticles);
-    }
-
-    function updateRange(type, value) {
-      document.getElementById(`${type}-val`).textContent = value;
-    }
-
-    function fizzBuzzAlgorithm(start, end, d1, l1, d2, l2) {
-      const result = [];
-      const cache = new Map();
-      for (let i = start; i <= end; i++) {
-        let output = '';
-        const key = `${i % d1 === 0}-${i % d2 === 0}`;
-        if (cache.has(key)) {
-          output = cache.get(key);
-        } else {
-          if (i % d1 === 0) output += l1;
-          if (i % d2 === 0) output += l2;
-          cache.set(key, output);
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FizzBuzz | Algorithmic Visualization Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;400;700;800&family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        :root {
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #ffff00;
+            --dark-void: #0a0a0f;
+            --deep-space: #12121a;
+            --glass: rgba(255, 255, 255, 0.03);
         }
-        result.push({
-          number: i,
-          value: output || i,
-          type: output ? (output === l1 + l2 ? 'fizzbuzz' : output === l1 ? 'fizz' : 'buzz') : 'number',
-          divisibleBy: [i % d1 === 0 ? d1 : null, i % d2 === 0 ? d2 : null].filter(Boolean)
-        });
-      }
-      return result;
-    }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--dark-void);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        #quantum-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+        }
+        
+        .glitch-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.05em;
+            position: relative;
+            display: inline-block;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: quantum-shift 4s ease-in-out infinite;
+        }
+        
+        @keyframes quantum-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+        
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            margin-top: 1rem;
+            opacity: 0.8;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+        
+        .control-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .control-panel {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-panel::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-cyan), transparent, var(--neon-magenta));
+            border-radius: 20px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s;
+        }
+        
+        .control-panel:hover::before {
+            opacity: 0.5;
+            animation: border-rotate 3s linear infinite;
+        }
+        
+        @keyframes border-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .panel-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel-title::before {
+            content: '>';
+            color: var(--neon-magenta);
+        }
+        
+        .range-container {
+            margin: 1.5rem 0;
+        }
+        
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
+            transition: transform 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        
+        .custom-divisors {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            color: var(--neon-cyan);
+            padding: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        
+        .btn-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .quantum-btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 1rem 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+        
+        .quantum-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .quantum-btn.primary {
+            background: var(--neon-cyan);
+            color: var(--dark-void);
+            font-weight: 700;
+        }
+        
+        .quantum-btn.primary:hover {
+            background: #fff;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.6);
+        }
+        
+        .visualization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin: 3rem 0;
+            perspective: 1000px;
+        }
+        
+        .fizz-node {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: node-appear 0.5s ease-out backwards;
+        }
+        
+        @keyframes node-appear {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotateY(180deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotateY(0);
+            }
+        }
+        
+        .fizz-node.number {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+        
+        .fizz-node.fizz {
+            background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(0, 243, 255, 0.05));
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            animation: pulse-cyan 2s infinite;
+        }
+        
+        .fizz-node.buzz {
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(255, 0, 255, 0.05));
+            border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+            animation: pulse-magenta 2s infinite;
+        }
+        
+        .fizz-node.fizzbuzz {
+            background: linear-gradient(135deg, rgba(255, 255, 0, 0.2), rgba(255, 255, 0, 0.05));
+            border: 1px solid var(--neon-yellow);
+            color: var(--neon-yellow);
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.3);
+            animation: pulse-yellow 1s infinite;
+            font-size: 0.6rem;
+        }
+        
+        @keyframes pulse-cyan {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(0, 243, 255, 0.4); }
+        }
+        
+        @keyframes pulse-magenta {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(255, 0, 255, 0.4); }
+        }
+        
+        @keyframes pulse-yellow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 0, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(255, 255, 0, 0.6); }
+        }
+        
+        .fizz-node:hover {
+            transform: scale(1.1) translateZ(20px);
+            z-index: 100;
+        }
+        
+        .fizz-node .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem;
+        }
+        
+        .fizz-node:hover .tooltip {
+            opacity: 1;
+        }
+        
+        .stats-matrix {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            opacity: 0.5;
+        }
+        
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        .code-terminal {
+            background: #0d0d12;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 243, 255, 0.1);
+            margin: 3rem 0;
+            overflow: hidden;
+        }
+        
+        .terminal-header {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+        
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 1rem;
+        }
+        
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .line-number {
+            color: #444;
+            min-width: 2rem;
+            text-align: right;
+            user-select: none;
+        }
+        
+        .code-content {
+            color: #e0e0e0;
+        }
+        
+        .keyword { color: #ff79c6; }
+        .function { color: #8be9fd; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .comment { color: #6272a4; }
+        .operator { color: #ff79c6; }
+        
+        .wave-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .mode-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .mode-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn:hover {
+            background: rgba(0, 243, 255, 0.1);
+            border-color: var(--neon-cyan);
+        }
+        
+        .mode-btn.active {
+            background: var(--neon-cyan);
+            color: var(--dark-void);
+        }
+        
+        @media (max-width: 768px) {
+            .stats-matrix {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .visualization-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="quantum-canvas"></canvas>
+    
+    <div class="mode-toggle">
+        <button class="mode-btn active" onclick="setMode('grid')" title="Grid View">⊞</button>
+        <button class="mode-btn" onclick="setMode('wave')" title="Wave View">∿</button>
+        <button class="mode-btn" onclick="setMode('spiral')" title="Spiral View">◎</button>
+    </div>
+    
+    <div class="container">
+        <header>
+            <h1 class="glitch-title">FizzBuzz</h1>
+            <p class="subtitle">Algorithmic Visualization Engine v2.0</p>
+        </header>
+        
+        <div class="control-matrix">
+            <div class="control-panel">
+                <div class="panel-title">Range Configuration</div>
+                <div class="range-container">
+                    <div class="range-label">
+                        <span>Start</span>
+                        <span id="start-val">1</span>
+                    </div>
+                    <input type="range" id="start-range" min="1" max="1000" value="1" oninput="updateRange('start', this.value)">
+                </div>
+                <div class="range-container">
+                    <div class="range-label">
+                        <span>End</span>
+                        <span id="end-val">100</span>
+                    </div>
+                    <input type="range" id="end-range" min="1" max="1000" value="100" oninput="updateRange('end', this.value)">
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="panel-title">Custom Divisors</div>
+                <div class="custom-divisors">
+                    <div class="input-group">
+                        <label>First Divisor</label>
+                        <input type="number" id="div-1" value="3" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>First Label</label>
+                        <input type="text" id="label-1" value="Fizz">
+                    </div>
+                    <div class="input-group">
+                        <label>Second Divisor</label>
+                        <input type="number" id="div-2" value="5" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Second Label</label>
+                        <input type="text" id="label-2" value="Buzz">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-panel">
+                <div class="panel-title">Execution Control</div>
+                <div class="btn-matrix">
+                    <button class="quantum-btn primary" onclick="executeFizzBuzz()">Initialize</button>
+                    <button class="quantum-btn" onclick="exportData()">Export JSON</button>
+                    <button class="quantum-btn" onclick="benchmark()">Benchmark</button>
+                    <button class="quantum-btn" onclick="clearAll()">Clear</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-matrix">
+            <div class="stat-card">
+                <span class="stat-value" id="stat-total">0</span>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="stat-fizz">0</span>
+                <div class="stat-label">Fizz Count</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="stat-buzz">0</span>
+                <div class="stat-label">Buzz Count</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="stat-fizzbuzz">0</span>
+                <div class="stat-label">FizzBuzz Count</div>
+            </div>
+        </div>
+        
+        <div class="visualization-grid" id="viz-grid"></div>
+        
+        <div class="code-terminal">
+            <div class="terminal-header">
+                <div class="terminal-dot red"></div>
+                <div class="terminal-dot yellow"></div>
+                <div class="terminal-dot green"></div>
+                <span class="terminal-title">source.js — fizzBuzz implementation</span>
+            </div>
+            <div class="terminal-body" id="code-display"></div>
+        </div>
+    </div>
+    
+    <svg class="wave-container" id="wave-svg" viewBox="0 0 1440 200" preserveAspectRatio="none">
+        <path id="wave-path" fill="rgba(0, 243, 255, 0.1)" stroke="rgba(0, 243, 255, 0.3)" stroke-width="2"></path>
+    </svg>
 
-    function executeFizzBuzz() {
-      const start = parseInt(document.getElementById('start-range').value);
-      const end = parseInt(document.getElementById('end-range').value);
-      const d1 = parseInt(document.getElementById('div-1').value) || 3;
-      const d2 = parseInt(document.getElementById('div-2').value) || 5;
-      const l1 = document.getElementById('label-1').value || 'Fizz';
-      const l2 = document.getElementById('label-2').value || 'Buzz';
-      const startTime = performance.now();
-      fizz
+    <script>
+        const canvas = document.getElementById('quantum-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let animationId;
+        let currentMode = 'grid';
+        let fizzBuzzData = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2;
+                this.color = Math.random() > 0.5 ? '#00f3ff' : '#ff00ff';
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${0.1 * (1 - dist / 150)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+            
+            animationId = requestAnimationFrame(animateParticles);
+        }
+        
+        function updateRange(type, value) {
+            document.getElementById(`${type}-val`).textContent = value;
+        }
+        
+        function fizzBuzzAlgorithm(start, end, d1, l1, d2, l2) {
+            const result = [];
+            const cache = new Map();
+            
+            for (let i = start; i <= end; i++) {
+                let output = '';
+                const key = `${i % d1 === 0}-${i % d2 === 0}`;
+                
+                if (cache.has(key)) {
+                    output = cache.get(key);
+                } else {
+                    if (i % d1 === 0) output += l1;
+                    if (i % d2 === 0) output += l2;
+                    cache.set(key, output);
+                }
+                
+                result.push({
+                    number: i,
+                    value: output || i,
+                    type: output ? (output === l1 + l2 ? 'fizzbuzz' : output === l1 ? 'fizz' : 'buzz') : 'number',
+                    divisibleBy: [i % d1 === 0 ? d1 : null, i % d2 === 0 ? d2 : null].filter(Boolean)
+                });
+            }
+            
+            return result;
+        }
+        
+        function executeFizzBuzz() {
+            const start = parseInt(document.getElementById('start-range').value);
+            const end = parseInt(document.getElementById('end-range').value);
+            const d1 = parseInt(document.getElementById('div-1').value) || 3;
+            const d2 = parseInt(document.getElementById('div-2').value) || 5;
+            const l1 = document.getElementById('label-1').value || 'Fizz';
+            const l2 = document.getElementById('label-2').value || 'Buzz';
+            
+            const startTime = performance.now();
+            fizzBuzzData = fizzBuzzAlgorithm(start, end, d1, l1, d2, l2);
+            const endTime = performance.now();
+            
+            renderVisualization(fizzBuzzData);
+            updateStats(fizzBuzzData);
+            renderCode(d1, l1, d2, l2);
+            
+            console.log(`Execution time: ${(endTime - startTime).toFixed(3)}ms`);
+        }
+        
+        function renderVisualization(data) {
+            const grid = document.getElementById('viz-grid');
+            grid.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = `fizz-node ${item.type}`;
+                node.style.animationDelay = `${index * 0.01}s`;
+                
+                if (currentMode === 'wave') {
+                    node.style.transform = `translateY(${Math.sin(index * 0.2) * 20}px)`;
+                } else if (currentMode === 'spiral') {
+                    const angle = index * 0.5;
+                    const radius = index * 2;
+                    node.style.position = 'absolute';
+                    node.style.left = `calc(50% + ${Math.cos(angle) * radius}px)`;
+                    node.style.top = `calc(50% + ${Math.sin(angle) * radius}px)`;
+                }
+                
+                node.innerHTML = `
+                    ${item.value}
+                    <div class="tooltip">${item.number} → ${item.value}</div>
+                `;
+                
+                node.onclick = () => {
+                    node.style.transform = 'scale(1.5) rotate(360deg)';
+                    setTimeout(() => {
+                        node.style.transform = '';
+                    }, 500);
+                };
+                
+                grid.appendChild(node);
+            });
+        }
+        
+        function updateStats(data) {
+            const stats = {
+                total: data.length,
+                fizz: data.filter(d => d.type === 'fizz').length,
+                buzz: data.filter(d => d.type === 'buzz').length,
+                fizzbuzz: data.filter(d => d.type === 'fizzbuzz').length
+            };
+            
+            Object.keys(stats).forEach(key => {
+                const el = document.getElementById(`stat-${key}`);
+                animateNumber(el, parseInt(el.textContent), stats[key]);
+            });
+        }
+        
+        function animateNumber(element, start, end) {
+            const duration = 1000;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                const current = Math.floor(start + (end - start) * ease);
+                
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+        
+        function renderCode(d1, l1, d2, l2) {
+            const code = `<span class="keyword">function</span> <span class="function">fizzBuzz</span><span class="operator">()</span> <span class="operator">{</span>
+  <span class="keyword">const</span> result <span class="operator">=</span> <span class="operator">[]</span><span class="operator">;</span>
+  
+  <span class="keyword">for</span> <span class="operator">(</span><span class="keyword">let</span> i <span class="operator">=</span> <span class="number">1</span><span class="operator">;</span> i <span class="operator"><=</span> <span class="number">100</span><span class="operator">;</span> i<span class="operator">++</span><span class="operator">)</span> <span class="operator">{</span>
+    <span class="keyword">if</span> <span class="operator">(</span>i <span class="operator">%</span> <span class="number">${d1}</span> <span class="operator">===</span> <span class="number">0</span> <span class="operator">&&</span> i <span class="operator">%</span> <span class="number">${d2}</span> <span class="operator">===</span> <span class="number">0</span><span class="operator">)</span> <span class="operator">{</span>
+      result<span class="operator">.</span><span class="function">push</span><span class="operator">(</span><span class="string">"${l1}${l2}"</span><span class="operator">)</span><span class="operator">;</span>
+    <span class="operator">}</span> <span class="keyword">else if</span> <span class="operator">(</span>i <span class="operator">%</span> <span class="number">${d1}</span> <span class="operator">===</span> <span class="number">0</span><span class="operator">)</span> <span class="operator">{</span>
+      result<span class="operator">.</span><span class="function">push</span><span class="operator">(</span><span class="string">"${l1}"</span><span class="operator">)</span><span class="operator">;</span>
+    <span class="operator">}</span> <span class="keyword">else if</span> <span class="operator">(</span>i <span class="operator">%</span> <span class="number">${d2}</span> <span class="operator">===</span> <span class="number">0</span><span class="operator">)</span> <span class="operator">{</span>
+      result<span class="operator">.</span><span class="function">push</span><span class="operator">(</span><span class="string">"${l2}"</span><span class="operator">)</span><span class="operator">;</span>
+    <span class="operator">}</span> <span class="keyword">else</span> <span class="operator">{</span>
+      result<span class="operator">.</span><span class="function">push</span><span class="operator">(</span>i<span class="operator">)</span><span class="operator">;</span>
+    <span class="operator">}</span>
+  <span class="operator">}</span>
+  
+  <span class="keyword">return</span> result<span class="operator">;</span>
+<span class="operator">}</span>`;
+            
+            document.getElementById('code-display').innerHTML = code.split('\n').map((line, i) => 
+                `<div class="code-line"><span class="line-number">${i + 1}</span><span class="code-content">${line}</span></div>`
+            ).join('');
+        }
+        
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (fizzBuzzData.length) renderVisualization(fizzBuzzData);
+        }
+        
+        function exportData() {
+            const blob = new Blob([JSON.stringify(fizzBuzzData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fizzbuzz-data-${Date.now()}.json`;
+            a.click();
+        }
+        
+        function benchmark() {
+            const iterations = 10000;
+            const start = performance.now();
+            
+            for (let i = 0; i < iterations; i++) {
+                fizzBuzzAlgorithm(1, 100, 3, 'Fizz', 5, 'Buzz');
+            }
+            
+            const end = performance.now();
+            const avg = ((end - start) / iterations).toFixed(4);
+            
+            alert(`Benchmark Results:\n${iterations.toLocaleString()} iterations\nAverage: ${avg}ms per execution\nTotal: ${(end - start).toFixed(2)}ms`);
+        }
+        
+        function clearAll() {
+            document.getElementById('viz-grid').innerHTML = '';
+            document.getElementById('code-display').innerHTML = '';
+            ['stat-total', 'stat-fizz', 'stat-buzz', 'stat-fizzbuzz'].forEach(id => {
+                document.getElementById(id).textContent = '0';
+            });
+            fizzBuzzData = [];
+        }
+        
+        function animateWave() {
+            const path = document.getElementById('wave-path');
+            let time = 0;
+            
+            function updateWave() {
+                time += 0.02;
+                const points = [];
+                const width = 1440;
+                const segments = 20;
+                
+                for (let i = 0; i <= segments; i++) {
+                    const x = (i / segments) * width;
+                    const y = 100 + Math.sin(i * 0.5 + time) * 30 + Math.sin(i * 0.3 - time) * 20;
+                    points.push(`${x},${y}`);
+                }
+                
+                path.setAttribute('d', `M0,200 L${points.join(' L')} L1440,200 Z`);
+                requestAnimationFrame(updateWave);
+            }
+            
+            updateWave();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            initParticles();
+            animateParticles();
+            animateWave();
+            executeFizzBuzz();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                executeFizzBuzz();
+            }
+        });
+    </script>
+</body>
+</html>
