@@ -1,4 +1,3 @@
-```markdown
 # ⚛️ FizzBuzz Quantum Engine
 
 <div align="center">
